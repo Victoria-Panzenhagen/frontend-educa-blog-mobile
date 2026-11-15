@@ -1,98 +1,145 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { PostCard } from "@/components/posts/PostCard";
+import { getPosts } from "@/services/post.service";
+import { Post } from "@/types/post";
+import { colors, spacing, typography } from "@/theme";
+import { router } from "expo-router";
+import { AppHeader } from '@/components/common/AppHeader';
 
 export default function HomeScreen() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadPosts = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await getPosts();
+      setPosts(response.data);
+    } catch (err) {
+      console.error("Erro ao carregar posts:", err);
+      setError("Não foi possível carregar os posts. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
+
+  function handleOpenPost(post: Post) {
+    router.push(`/posts/${post.id}`);
+  }
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <AppHeader />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.list}
+        ItemSeparatorComponent={() => <View style={{ height: spacing.lg }} />}
+        ListHeaderComponent={
+          <View style={styles.listHeader}>
+            <Text style={styles.title}>Posts recentes</Text>
+            <Text style={styles.count}>{posts.length} posts</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          loading ? (
+            <ActivityIndicator size="large" color={colors.primary} />
+          ) : error ? (
+            <View>
+              <Text style={styles.message}>{error}</Text>
+              <Text style={styles.retry} onPress={loadPosts}>
+                Tentar novamente
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.message}>Nenhum post encontrado.</Text>
+          )
+        }
+        renderItem={({ item }) => (
+          <PostCard post={item} onPress={handleOpenPost} />
+        )}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: colors.background,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+
+  /*header: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+
+  logo: {
+    color: colors.white,
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
   },
+
+  subtitle: {
+    color: colors.white,
+    fontSize: typography.sizes.sm,
+    marginTop: spacing.xs,
+  },*/
+
+  list: {
+    padding: spacing.xxl,
+    paddingBottom: spacing.xxxl,
+    flexGrow: 1,
+  },
+
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.lg,
+  },
+
   title: {
-    textAlign: 'center',
+    color: colors.text,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
   },
-  code: {
-    textTransform: 'uppercase',
+
+  count: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.xs,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+
+  message: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.sm,
+    textAlign: "center",
+    marginTop: spacing.lg,
+  },
+
+  retry: {
+    color: colors.primary,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.bold,
+    textAlign: "center",
+    marginTop: spacing.md,
   },
 });
