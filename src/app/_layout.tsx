@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import {
   Stack,
@@ -12,7 +13,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { colors } from "@/theme";
 
 function RootNavigator() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   const router = useRouter();
   const segments = useSegments();
@@ -28,12 +29,32 @@ function RootNavigator() {
 
     if (!isAuthenticated && !isPublicScreen) {
       router.replace("/login");
+      return;
     }
 
     if (isAuthenticated && isPublicScreen) {
+      router.replace(
+        user?.role === "PROFESSOR" ? "/meus-posts" : "/",
+      );
+      return;
+    }
+
+    if (isAuthenticated && user?.role === "PROFESSOR" && !segments[0]) {
+      router.replace("/meus-posts");
+      return;
+    }
+
+    if (isAuthenticated && user?.role === "ALUNO" && segments[0] === "meus-posts") {
       router.replace("/");
     }
-  }, [isAuthenticated, isLoading, segments, navigationState?.key, router]);
+  }, [
+    user,
+    isAuthenticated,
+    isLoading,
+    segments,
+    navigationState?.key,
+    router,
+  ]);
 
   if (isLoading) {
     return (

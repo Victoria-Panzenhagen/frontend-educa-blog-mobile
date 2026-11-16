@@ -7,3 +7,9 @@ export interface Post {
   author: string;
   createdAt: string;
 }
+
+export interface PostInput {
+  title: string;
+  content: string;
+  disciplineId: number;
+}

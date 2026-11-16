@@ -7,9 +7,18 @@ import { colors, spacing, radius, typography } from '@/theme';
 interface PostCardProps {
   post: Post;
   onPress: (post: Post) => void;
+  onEdit?: (post: Post) => void;
+  onDelete?: (post: Post) => void;
 }
 
-export function PostCard({ post, onPress }: PostCardProps) {
+export function PostCard({
+  post,
+  onPress,
+  onEdit,
+  onDelete,
+}: PostCardProps) {
+  const isManagementMode = !!onEdit || !!onDelete;
+
   return (
     <View style={styles.card}>
       <View style={styles.content}>
@@ -31,17 +40,53 @@ export function PostCard({ post, onPress }: PostCardProps) {
           Por <Text style={styles.authorName}>{post.author}</Text>
         </Text>
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => onPress(post)}
-        >
-          <Text style={styles.buttonText}>
-            Ler post →
-          </Text>
-        </Pressable>
+        {isManagementMode ? (
+          <View style={styles.actions}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={() => onPress(post)}
+            >
+              <Text style={styles.buttonText}>Visualizar</Text>
+            </Pressable>
+
+            {onEdit && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => onEdit(post)}
+              >
+                <Text style={styles.editText}>Editar</Text>
+              </Pressable>
+            )}
+
+            {onDelete && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => onDelete(post)}
+              >
+                <Text style={styles.deleteText}>Excluir</Text>
+              </Pressable>
+            )}
+          </View>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() => onPress(post)}
+          >
+            <Text style={styles.buttonText}>Ler post</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -102,6 +147,14 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.bold,
   },
 
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+
   button: {
     alignSelf: 'flex-start',
     backgroundColor: colors.primary,
@@ -110,12 +163,32 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
 
+  actionButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
   buttonPressed: {
     opacity: 0.75,
   },
 
   buttonText: {
     color: colors.white,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  },
+
+  editText: {
+    color: colors.primary,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  },
+
+  deleteText: {
+    color: '#DC2626',
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.bold,
   },

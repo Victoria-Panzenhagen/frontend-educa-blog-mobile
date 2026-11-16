@@ -1,7 +1,7 @@
 
 import { api } from './api';
 import { ApiPost, PaginatedResponse } from '@/types/api';
-import { Post } from '@/types/post';
+import { Post, PostInput } from '@/types/post';
 
 function mapPost(post: ApiPost): Post {
   return {
@@ -35,4 +35,36 @@ export async function getPostById(id: number): Promise<Post> {
   const response = await api.get<ApiPost>(`/posts/${id}`);
 
   return mapPost(response.data);
+}
+
+export async function getMyPosts(
+  page = 1,
+  limit = 10,
+): Promise<PaginatedResponse<Post>> {
+  const response = await api.get<PaginatedResponse<ApiPost>>(
+    '/posts/me',
+    {
+      params: { page, limit },
+    },
+  );
+
+  return {
+    ...response.data,
+    data: response.data.data.map(mapPost),
+  };
+}
+
+export async function createPost(data: PostInput): Promise<void> {
+  await api.post('/posts', data);
+}
+
+export async function updatePost(
+  id: number,
+  data: PostInput,
+): Promise<void> {
+  await api.put(`/posts/${id}`, data);
+}
+
+export async function deletePost(id: number): Promise<void> {
+  await api.delete(`/posts/${id}`);
 }
