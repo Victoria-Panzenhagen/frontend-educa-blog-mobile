@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -12,7 +13,7 @@ import { router } from "expo-router";
 
 import { AppHeader } from "@/components/common/AppHeader";
 import { PostCard } from "@/components/posts/PostCard";
-import { getMyPosts } from "@/services/post.service";
+import { deletePost, getMyPosts } from "@/services/post.service";
 import { Post } from "@/types/post";
 import { colors, spacing, typography } from "@/theme";
 
@@ -46,6 +47,45 @@ export default function MyPostsScreen() {
 
   function handleCreatePost() {
     router.push("/posts/novo");
+  }
+
+  function handleEditPost(post: Post) {
+    router.push(`/posts/${post.id}/editar`);
+  }
+
+  function handleDeletePost(post: Post) {
+    Alert.alert(
+      "Excluir post",
+      `Tem certeza de que deseja excluir "${post.title}"? Essa ação não poderá ser desfeita.`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePost(post.id);
+
+              setPosts((currentPosts) =>
+                currentPosts.filter((item) => item.id !== post.id),
+              );
+
+              Alert.alert("Sucesso", "Post excluído com sucesso.");
+            } catch (error) {
+              console.error("Erro ao excluir post:", error);
+
+              Alert.alert(
+                "Erro",
+                "Não foi possível excluir o post. Tente novamente.",
+              );
+            }
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -101,7 +141,12 @@ export default function MyPostsScreen() {
           )
         }
         renderItem={({ item }) => (
-          <PostCard post={item} onPress={handleOpenPost} />
+          <PostCard
+            post={item}
+            onPress={handleOpenPost}
+            onEdit={handleEditPost}
+            onDelete={handleDeletePost}
+          />
         )}
       />
     </SafeAreaView>

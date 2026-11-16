@@ -9,6 +9,7 @@ function mapPost(post: ApiPost): Post {
     title: post.title,
     content: post.content,
     discipline: post.discipline.name,
+    disciplineId: post.discipline.id,
     author: post.autor,
     createdAt: post.createdAt,
   };

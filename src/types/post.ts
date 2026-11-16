@@ -4,6 +4,7 @@ export interface Post {
   title: string;
   content: string;
   discipline: string;
+  disciplineId: number;
   author: string;
   createdAt: string;
 }
