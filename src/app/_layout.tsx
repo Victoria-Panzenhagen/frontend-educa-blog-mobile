@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import {
   Stack,
+  Href,
   useRouter,
   useSegments,
   useRootNavigationState,
@@ -46,6 +47,16 @@ function RootNavigator() {
 
     if (isAuthenticated && user?.role === "ALUNO" && segments[0] === "meus-posts") {
       router.replace("/");
+      return;
+    }
+
+    if (isAuthenticated && user?.role === "ALUNO" && segments[0] === "usuarios") {
+      router.replace("/posts" as Href);
+      return;
+    }
+
+    if (isAuthenticated && user?.role === "PROFESSOR" && segments[0] === "alunos") {
+      router.replace("/meus-posts");
     }
   }, [
     user,

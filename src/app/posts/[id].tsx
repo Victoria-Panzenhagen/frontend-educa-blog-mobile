@@ -8,12 +8,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Href, router, Stack, useLocalSearchParams } from "expo-router";
 
 import { getPostById } from "@/services/post.service";
 import { Post } from "@/types/post";
 import { colors, spacing, radius, typography } from "@/theme";
 import { AppHeader } from "@/components/common/AppHeader";
+import { BottomActionBar } from "@/components/common/BottomActionBar";
 
 export default function PostDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -80,7 +81,7 @@ export default function PostDetailsScreen() {
           </Pressable>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <View style={styles.disciplineBadge}>
             <Text style={styles.disciplineText}>{post.discipline}</Text>
           </View>
@@ -98,6 +99,7 @@ export default function PostDetailsScreen() {
           <Text style={styles.body}>{post.content}</Text>
         </ScrollView>
       )}
+      <BottomActionBar label="Voltar para posts" onPress={() => router.replace('/posts' as Href)} />
     </SafeAreaView>
   );
 }
@@ -114,6 +116,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: spacing.xxl,
   },
+
+  scrollView: { flex: 1 },
 
   content: {
     padding: spacing.xxl,

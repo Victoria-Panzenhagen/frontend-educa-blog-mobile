@@ -40,6 +40,10 @@ export function PostCard({
           Por <Text style={styles.authorName}>{post.author}</Text>
         </Text>
 
+        <Text style={styles.date}>
+          Publicado em {new Date(post.createdAt).toLocaleDateString('pt-BR')}
+        </Text>
+
         {isManagementMode ? (
           <View style={styles.actions}>
             <Pressable
@@ -145,6 +149,11 @@ const styles = StyleSheet.create({
   authorName: {
     color: colors.text,
     fontWeight: typography.weights.bold,
+  },
+
+  date: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.xs,
   },
 
   actions: {

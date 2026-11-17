@@ -53,6 +53,10 @@ export async function getStoredUser(): Promise<AuthUser | null> {
     return JSON.parse(storedUser) as AuthUser;
 }
 
+export async function saveStoredUser(user: AuthUser): Promise<void> {
+    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+}
+
 export async function register(
     credentials: RegisterCredentials,
 ): Promise<RegisterResponse> {

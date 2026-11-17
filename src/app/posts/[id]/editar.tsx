@@ -11,6 +11,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/common/AppHeader';
+import { BottomActionBar } from '@/components/common/BottomActionBar';
 import { PostForm } from '@/components/posts/PostForm';
 import { getPostById, updatePost } from '@/services/post.service';
 import { PostInput } from '@/types/post';
@@ -107,6 +108,7 @@ export default function EditPostScreen() {
           onSubmit={handleSubmit}
         />
       ) : null}
+      <BottomActionBar label="Cancelar" onPress={() => router.replace('/meus-posts')} />
     </SafeAreaView>
   );
 }

@@ -13,6 +13,7 @@ import {
   logout as logoutService,
   getStoredToken,
   getStoredUser,
+  saveStoredUser,
 } from '@/services/auth.service';
 
 import { AuthUser, LoginCredentials } from '@/types/auth';
@@ -23,6 +24,7 @@ interface AuthContextData {
   isLoading: boolean;
   signIn: (credentials: LoginCredentials) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (profile: Pick<AuthUser, 'name' | 'email'>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>(
@@ -71,6 +73,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(
+    async (profile: Pick<AuthUser, 'name' | 'email'>) => {
+      if (!user) return;
+      const updatedUser = { ...user, ...profile };
+      await saveStoredUser(updatedUser);
+      setUser(updatedUser);
+    },
+    [user],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -79,6 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         signIn,
         signOut,
+        updateProfile,
       }}
     >
       {children}
