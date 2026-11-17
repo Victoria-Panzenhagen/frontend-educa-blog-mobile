@@ -4,7 +4,7 @@ import { CreateUserInput, UpdateUserInput, User } from '@/types/user';
 
 export async function getUsers(
   page = 1,
-  limit = 10,
+  limit = 5,
   search = '',
 ): Promise<PaginatedResponse<User>> {
   const response = await api.get<PaginatedResponse<User>>('/users', {

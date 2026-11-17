@@ -20,7 +20,7 @@ import { User, UserRole } from '@/types/user';
 import { colors, radius, spacing, typography } from '@/theme';
 
 type RoleFilter = 'TODOS' | UserRole;
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export default function UsersScreen() {
   const [users, setUsers] = useState<User[]>([]);
@@ -70,7 +70,7 @@ export default function UsersScreen() {
           const start = (page - 1) * PAGE_SIZE;
           setUsers(filteredUsers.slice(start, start + PAGE_SIZE));
           setTotal(filteredUsers.length);
-          setTotalPages(Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE)));
+          setTotalPages(filteredPageCount);
         }
       } catch (err) {
         if (!active) return;
@@ -111,14 +111,14 @@ export default function UsersScreen() {
     }
   }
 
+  function openEdit(user: User) {
+    router.push(`/usuarios/${user.id}/editar` as Href);
+  }
+
   function changeFilter(filter: RoleFilter) {
     setLoading(true);
     setPage(1);
     setRoleFilter(filter);
-  }
-
-  function openEdit(user: User) {
-    router.push(`/usuarios/${user.id}/editar` as Href);
   }
 
   function confirmDelete(user: User) {

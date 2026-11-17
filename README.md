@@ -118,19 +118,18 @@ flowchart LR
 
 Essas verificações no aplicativo controlam a experiência e a navegação. A API também precisa validar autorização para cada operação; uma rota escondida ou bloqueada no cliente não substitui autorização no servidor.
 
-**Limitação conhecida:** o layout bloqueia alunos em `/meus-posts` e `/usuarios`, mas não rejeita navegação direta de um aluno para `/posts/novo` ou `/posts/[id]/editar`. Esses atalhos não aparecem para alunos na interface; até que exista uma regra de rota específica, o backend deve rejeitar operações de post não autorizadas.
 
 ### Serviços e tipos
 
 - `services/api.ts`: cliente Axios, URL base, timeout e interceptor `Authorization: Bearer` lendo `accessToken` do SecureStore.
 - `services/auth.service.ts`: login, logout, cadastro inicial e persistência da sessão.
 - `services/post.service.ts`: listagem, busca, detalhe, posts do professor, criação, atualização e exclusão.
-- `services/user.service.ts`: operações de usuários e busca paginada. `getAllUsers` percorre as páginas da API para permitir filtros locais completos por perfil.
+- `services/user.service.ts`: operações de usuários, listagem paginada e busca. `getAllUsers` percorre as páginas da API para montar a lista completa usada na área de alunos e nos filtros de perfil do professor.
 - `services/discipline.service.ts`: carrega disciplinas para o formulário de posts.
 - `types/api.ts`: resposta paginada comum `PaginatedResponse<T>`.
 - `types/post.ts`, `types/user.ts` e `types/auth.ts`: modelos e payloads usados pelos serviços e telas.
 
-O filtro por perfil de usuário é aplicado no app porque o endpoint `GET /users` não oferece filtro de perfil. Para evitar paginação inconsistente, o app carrega todos os resultados da busca, filtra por `role` e depois divide em páginas locais de dez itens. A busca por nome/e-mail continua usando o parâmetro `search` suportado pelo backend.
+O endpoint `GET /users` aplica o escopo de perfis conforme o usuário autenticado: para `ALUNO`, retorna apenas usuários com perfil `ALUNO`; para `PROFESSOR`, retorna alunos e professores. Na tela `/usuarios`, a opção **Todos** usa a paginação da API. O professor também pode selecionar **Alunos** ou **Professores**; nesses casos, o app carrega as páginas da busca e aplica o filtro escolhido antes de paginar a lista. A busca por nome/e-mail usa o parâmetro `search`.
 
 ## Rotas e permissões
 
@@ -145,7 +144,7 @@ Todas as rotas de conteúdo exigem sessão, exceto `/login` e `/register`.
 | `/posts/novo` | Cria publicação; o atalho é oferecido na área do professor. | Professor pela interface |
 | `/posts/[id]/editar` | Edita publicação; o atalho é oferecido na área do professor. | Professor pela interface |
 | `/perfil` | Consulta e edita os dados da conta autenticada. | Aluno e professor |
-| `/usuarios` | Lista todos os perfis e permite cadastro, edição e exclusão. | Professor |
+| `/usuarios` | Lista os perfis retornados pela API e permite cadastro, edição e exclusão. | Professor |
 | `/alunos` | Lista somente usuários com `role: ALUNO`. | Aluno |
 | `/alunos/novo` | Cadastra uma conta com perfil fixo `ALUNO`. | Aluno |
 | `/alunos/[id]/editar` | Edita um cadastro de aluno. | Aluno; a tela valida o perfil carregado |
@@ -168,7 +167,7 @@ https://post-api-7n8w.onrender.com/api/v1
 | --- | --- | --- |
 | `POST` | `/auth/login` | Autenticação e recebimento do token. |
 | `POST` | `/users` | Cadastro inicial e criação de contas. |
-| `GET` | `/users?page=&limit=&search=` | Listagem paginada e busca por nome/e-mail. |
+| `GET` | `/users?page=&limit=&search=` | Listagem paginada e busca por nome/e-mail; os perfis retornados dependem do papel autenticado. |
 | `GET` | `/users/:id` | Carregamento de perfil ou usuário para edição. |
 | `PUT` | `/users/:id` | Atualização de nome, e-mail e, opcionalmente, senha. |
 | `DELETE` | `/users/:id` | Exclusão de conta pelas telas de gerenciamento. |
@@ -218,7 +217,7 @@ O app trata conflitos de e-mail (`HTTP 409`) nas telas de criação e atualizaç
 ### Professor
 
 - **Meus posts** lista as publicações próprias, com ações de visualizar, editar, excluir e criar.
-- **Usuários** oferece listagem geral, busca, filtro por perfil, paginação, criação, edição e exclusão.
+- **Usuários** oferece listagem de alunos e professores, busca, filtros por perfil, paginação, criação, edição e exclusão. A opção **Todos** segue a paginação e o escopo da API.
 - **Meu perfil** edita os dados da conta de professor.
 - A listagem pública de posts pode ser aberta em **Início**.
 
