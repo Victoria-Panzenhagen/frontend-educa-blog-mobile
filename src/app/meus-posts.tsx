@@ -31,7 +31,7 @@ export default function MyPostsScreen() {
 
     async function fetchPosts() {
       try {
-        const response = await getMyPosts(page, 10);
+        const response = await getMyPosts(page, 5);
 
         if (!isActive) return;
 
@@ -95,7 +95,7 @@ export default function MyPostsScreen() {
               const updatedTotal = Math.max(0, total - 1);
               const updatedTotalPages = Math.max(
                 1,
-                Math.ceil(updatedTotal / 10),
+                Math.ceil(updatedTotal / 5),
               );
 
               setTotal(updatedTotal);

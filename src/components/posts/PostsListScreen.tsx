@@ -34,8 +34,8 @@ export default function HomeScreen() {
     async function fetchPosts() {
       try {
         const response = appliedSearch
-          ? await searchPosts(appliedSearch, page, 10)
-          : await getPosts(page, 10);
+          ? await searchPosts(appliedSearch, page, 5)
+          : await getPosts(page, 5);
 
         if (!isActive) return;
 

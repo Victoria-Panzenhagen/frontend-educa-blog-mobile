@@ -17,7 +17,7 @@ function mapPost(post: ApiPost): Post {
 
 export async function getPosts(
   page = 1,
-  limit = 10,
+  limit = 5,
 ): Promise<PaginatedResponse<Post>> {
   const response = await api.get<PaginatedResponse<ApiPost>>(
     '/posts',
@@ -40,7 +40,7 @@ export async function getPostById(id: number): Promise<Post> {
 
 export async function getMyPosts(
   page = 1,
-  limit = 10,
+  limit = 5,
 ): Promise<PaginatedResponse<Post>> {
   const response = await api.get<PaginatedResponse<ApiPost>>(
     '/posts/me',
@@ -74,7 +74,7 @@ export async function deletePost(id: number): Promise<void> {
 export async function searchPosts(
   search: string,
   page = 1,
-  limit = 10,
+  limit = 5,
 ): Promise<PaginatedResponse<Post>> {
   const response = await api.get<PaginatedResponse<ApiPost>>(
     '/posts/search',

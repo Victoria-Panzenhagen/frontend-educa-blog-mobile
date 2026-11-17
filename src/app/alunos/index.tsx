@@ -20,7 +20,7 @@ import { deleteUser, getAllUsers } from '@/services/user.service';
 import { User } from '@/types/user';
 import { colors, radius, spacing, typography } from '@/theme';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export default function StudentsScreen() {
   const { user: currentUser } = useAuth();
