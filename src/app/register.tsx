@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
-import axios from "axios";
+import { isAxiosError } from "axios";
 
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { register } from "@/services/auth.service";
@@ -76,7 +76,7 @@ export default function RegisterScreen() {
 
       let message = "Não foi possível realizar o cadastro. Tente novamente.";
 
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         const apiMessage = error.response?.data?.message;
 
         if (Array.isArray(apiMessage)) {

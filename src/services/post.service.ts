@@ -69,3 +69,26 @@ export async function updatePost(
 export async function deletePost(id: number): Promise<void> {
   await api.delete(`/posts/${id}`);
 }
+
+
+export async function searchPosts(
+  search: string,
+  page = 1,
+  limit = 10,
+): Promise<PaginatedResponse<Post>> {
+  const response = await api.get<PaginatedResponse<ApiPost>>(
+    '/posts/search',
+    {
+      params: {
+        search,
+        page,
+        limit,
+      },
+    },
+  );
+
+  return {
+    ...response.data,
+    data: response.data.data.map(mapPost),
+  };
+}

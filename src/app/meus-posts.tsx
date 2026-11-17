@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -21,25 +21,48 @@ export default function MyPostsScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const loadPosts = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await getMyPosts();
-      setPosts(response.data);
-    } catch (err) {
-      console.error("Erro ao carregar meus posts:", err);
-      setError("Não foi possível carregar seus posts. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    let isActive = true;
+
+    async function fetchPosts() {
+      try {
+        const response = await getMyPosts(page, 10);
+
+        if (!isActive) return;
+
+        setPosts(response.data);
+        setTotal(response.total);
+        setTotalPages(response.totalPages);
+        setError(null);
+      } catch (err) {
+        if (!isActive) return;
+
+        console.error("Erro ao carregar meus posts:", err);
+        setError("Não foi possível carregar seus posts. Tente novamente.");
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void fetchPosts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [page, refreshKey]);
+
+  function handleRetry() {
+    setLoading(true);
+    setError(null);
+    setRefreshKey((current) => current + 1);
+  }
 
   function handleOpenPost(post: Post) {
     router.push(`/posts/${post.id}`);
@@ -69,13 +92,29 @@ export default function MyPostsScreen() {
             try {
               await deletePost(post.id);
 
+              const updatedTotal = Math.max(0, total - 1);
+              const updatedTotalPages = Math.max(
+                1,
+                Math.ceil(updatedTotal / 10),
+              );
+
+              setTotal(updatedTotal);
+              setTotalPages(updatedTotalPages);
+
+              Alert.alert("Sucesso", "Post excluído com sucesso.");
+
+              if (posts.length === 1 && page > 1) {
+                setLoading(true);
+                setError(null);
+                setPage((current) => current - 1);
+                return;
+              }
+
               setPosts((currentPosts) =>
                 currentPosts.filter((item) => item.id !== post.id),
               );
-
-              Alert.alert("Sucesso", "Post excluído com sucesso.");
-            } catch (error) {
-              console.error("Erro ao excluir post:", error);
+            } catch (err) {
+              console.error("Erro ao excluir post:", err);
 
               Alert.alert(
                 "Erro",
@@ -86,6 +125,22 @@ export default function MyPostsScreen() {
         },
       ],
     );
+  }
+
+  function handlePreviousPage() {
+    if (page > 1) {
+      setLoading(true);
+      setError(null);
+      setPage((current) => current - 1);
+    }
+  }
+
+  function handleNextPage() {
+    if (page < totalPages) {
+      setLoading(true);
+      setError(null);
+      setPage((current) => current + 1);
+    }
   }
 
   return (
@@ -105,7 +160,7 @@ export default function MyPostsScreen() {
             </View>
 
             <Text style={styles.count}>
-              {posts.length} {posts.length === 1 ? "post" : "posts"}
+              {total} {total === 1 ? "post" : "posts"}
             </Text>
 
             {posts.length > 0 && (
@@ -121,7 +176,7 @@ export default function MyPostsScreen() {
           ) : error ? (
             <View>
               <Text style={styles.message}>{error}</Text>
-              <Text style={styles.retry} onPress={loadPosts}>
+              <Text style={styles.retry} onPress={handleRetry}>
                 Tentar novamente
               </Text>
             </View>
@@ -148,6 +203,34 @@ export default function MyPostsScreen() {
             onDelete={handleDeletePost}
           />
         )}
+        ListFooterComponent={
+          !loading && !error ? (
+            <View style={styles.pagination}>
+              <Pressable
+                style={[styles.pageButton, page === 1 && styles.disabledButton]}
+                onPress={handlePreviousPage}
+                disabled={page === 1}
+              >
+                <Text style={styles.pageButtonText}>Anterior</Text>
+              </Pressable>
+
+              <Text style={styles.pageInfo}>
+                Página {page} de {totalPages}
+              </Text>
+
+              <Pressable
+                style={[
+                  styles.pageButton,
+                  page === totalPages && styles.disabledButton,
+                ]}
+                onPress={handleNextPage}
+                disabled={page === totalPages}
+              >
+                <Text style={styles.pageButtonText}>Próxima</Text>
+              </Pressable>
+            </View>
+          ) : undefined
+        }
       />
     </SafeAreaView>
   );
@@ -229,5 +312,35 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.bold,
+  },
+
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: spacing.xl,
+    gap: spacing.sm,
+  },
+
+  pageButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: 8,
+  },
+
+  pageButtonText: {
+    color: colors.white,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  },
+
+  disabledButton: {
+    opacity: 0.4,
+  },
+
+  pageInfo: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.xs,
   },
 });

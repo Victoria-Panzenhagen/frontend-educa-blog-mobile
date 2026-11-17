@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -7,41 +6,58 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack, useLocalSearchParams } from "expo-router";
 
-import { getPostById } from '@/services/post.service';
-import { Post } from '@/types/post';
-import { colors, spacing, radius, typography } from '@/theme';
-import { AppHeader } from '@/components/common/AppHeader';
+import { getPostById } from "@/services/post.service";
+import { Post } from "@/types/post";
+import { colors, spacing, radius, typography } from "@/theme";
+import { AppHeader } from "@/components/common/AppHeader";
 
 export default function PostDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-
-  async function loadPost() {
-    try {
-      setLoading(true);
-      setError(false);
-
-      const data = await getPostById(Number(id));
-      setPost(data);
-    } catch (err) {
-      console.error('Erro ao carregar post:', err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    loadPost();
-  }, [id]);
+    let isActive = true;
+
+    async function fetchPost() {
+      try {
+        const data = await getPostById(Number(id));
+
+        if (!isActive) return;
+
+        setPost(data);
+        setError(false);
+      } catch (err) {
+        if (!isActive) return;
+
+        console.error("Erro ao carregar post:", err);
+        setError(true);
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void fetchPost();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id, refreshKey]);
+
+  function handleRetry() {
+    setLoading(true);
+    setError(false);
+    setRefreshKey((current) => current + 1);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,27 +75,22 @@ export default function PostDetailsScreen() {
             Não foi possível carregar este post.
           </Text>
 
-          <Pressable onPress={loadPost}>
+          <Pressable onPress={handleRetry}>
             <Text style={styles.retry}>Tentar novamente</Text>
           </Pressable>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.disciplineBadge}>
-            <Text style={styles.disciplineText}>
-              {post.discipline}
-            </Text>
+            <Text style={styles.disciplineText}>{post.discipline}</Text>
           </View>
 
           <Text style={styles.title}>{post.title}</Text>
 
-          <Text style={styles.metadata}>
-            Por {post.author}
-          </Text>
+          <Text style={styles.metadata}>Por {post.author}</Text>
 
           <Text style={styles.metadata}>
-            Publicado em{' '}
-            {new Date(post.createdAt).toLocaleDateString('pt-BR')}
+            Publicado em {new Date(post.createdAt).toLocaleDateString("pt-BR")}
           </Text>
 
           <View style={styles.divider} />
@@ -97,28 +108,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  /*header: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.xxl,
-    paddingVertical: spacing.lg,
-    gap: spacing.md,
-  },
-
-  /*backButton: {
-    color: colors.white,
-    fontSize: typography.sizes.sm,
-  },*/
-
-  /*logo: {
-    color: colors.white,
-    fontSize: typography.sizes.xl,
-    fontWeight: typography.weights.bold,
-  },*/
-
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: spacing.xxl,
   },
 
@@ -128,8 +121,8 @@ const styles = StyleSheet.create({
   },
 
   disciplineBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#F5E5FF',
+    alignSelf: "flex-start",
+    backgroundColor: "#F5E5FF",
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
@@ -140,7 +133,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.bold,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
 
   title: {
@@ -170,7 +163,7 @@ const styles = StyleSheet.create({
 
   message: {
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: typography.sizes.sm,
   },
 
