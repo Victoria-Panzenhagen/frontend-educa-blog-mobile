@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { CreateUserInput, UpdateUserInput, User, UserRole } from '@/types/user';
+import { PasswordInput } from '@/components/common/PasswordInput';
 import { colors, radius, spacing, typography } from '@/theme';
 
 interface UserFormProps {
@@ -103,14 +104,13 @@ export function UserForm({ mode, initialUser, fixedRole, loading = false, onSubm
 
       <View style={styles.field}>
         <Text style={styles.label}>{mode === 'create' ? 'Senha' : 'Nova senha (opcional)'}</Text>
-        <TextInput
+        <PasswordInput
           style={styles.input}
           value={password}
           onChangeText={setPassword}
           placeholder={mode === 'create' ? 'Digite a senha' : '********'}
           placeholderTextColor={colors.textSecondary}
           maxLength={100}
-          secureTextEntry
           autoComplete="new-password"
           editable={!loading}
         />

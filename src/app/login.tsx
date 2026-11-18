@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 
 import { AuthLayout } from '@/components/auth/AuthLayout';
+import { PasswordInput } from '@/components/common/PasswordInput';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, spacing, radius, typography } from '@/theme';
 
@@ -22,6 +23,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const passwordInputRef = useRef<TextInput>(null);
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -67,19 +69,24 @@ export default function LoginScreen() {
             value={email}
             onChangeText={setEmail}
             editable={!loading}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => passwordInputRef.current?.focus()}
           />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Senha</Text>
-          <TextInput
+          <PasswordInput
+            ref={passwordInputRef}
             style={styles.input}
             placeholder="Digite sua senha"
             placeholderTextColor={colors.textSecondary}
-            secureTextEntry
             value={password}
             onChangeText={setPassword}
             editable={!loading}
+            returnKeyType="go"
+            onSubmitEditing={handleLogin}
           />
         </View>
 

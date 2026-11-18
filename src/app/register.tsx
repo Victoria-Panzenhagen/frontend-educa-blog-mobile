@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { isAxiosError } from "axios";
 
 import { AuthLayout } from "@/components/auth/AuthLayout";
+import { PasswordInput } from "@/components/common/PasswordInput";
 import { register } from "@/services/auth.service";
 import { UserRole } from "@/types/auth";
 import { colors, spacing, radius, typography } from "@/theme";
@@ -132,14 +133,13 @@ export default function RegisterScreen() {
 
         <View style={styles.field}>
           <Text style={styles.label}>Senha *</Text>
-          <TextInput
+          <PasswordInput
             style={styles.input}
             placeholder="Digite uma senha"
             placeholderTextColor={colors.textSecondary}
             value={password}
             onChangeText={setPassword}
             editable={!loading}
-            secureTextEntry
           />
         </View>
 
