@@ -3,7 +3,7 @@ import { create } from "axios";
 import * as SecureStore from "expo-secure-store";
 
 export const api = create({
-  baseURL: "https://post-api-7n8w.onrender.com/api/v1",
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -20,4 +20,3 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// https://post-api-7n8w.onrender.com/docs#/Posts/PostController_findOne
