@@ -11,6 +11,7 @@ Aplicativo mobile do Educa Blog para leitura e gerenciamento de publicações e 
 - [Rotas e permissões](#rotas-e-permissões)
 - [Integração com a API](#integração-com-a-api)
 - [Guia de uso](#guia-de-uso)
+- [Desafios de desenvolvimento](#desafios-de-desenvolvimento)
 - [Verificações](#verificações)
 - [Referências](#referências)
 
@@ -47,13 +48,19 @@ No Android ou iOS físico, o computador e o dispositivo precisam conseguir se co
 
 ### URL da API
 
-A URL base está configurada em `src/services/api.ts`:
+Configure a URL base pela variável `EXPO_PUBLIC_API_URL`, lida em `src/services/api.ts`. Para preparar o ambiente local, copie o arquivo de exemplo:
 
-```text
-https://post-api-7n8w.onrender.com/api/v1
+```bash
+cp .env-exemple .env
 ```
 
-Não há arquivo `.env` ou configuração de ambiente para essa URL atualmente. Para apontar o app para outro backend, altere a base URL no serviço Axios. Não altere contratos nem adicione parâmetros que não existam na API.
+No `.env`, defina a URL base da API:
+
+```env
+EXPO_PUBLIC_API_URL=https://seu-servidor/api/v1
+```
+
+O arquivo `.env-exemple` contém o modelo dessa configuração. Como variáveis com prefixo `EXPO_PUBLIC_` são incluídas no app cliente, use essa variável somente para a URL pública da API, nunca para senhas ou chaves secretas.
 
 ## Comandos disponíveis
 
@@ -238,6 +245,10 @@ npx expo lint
 ```
 
 O projeto atualmente não tem uma suíte de testes automatizados ou comando `test` no `package.json`.
+
+## Desafios de desenvolvimento
+
+A maior dificuldade encontrada durante o desenvolvimento esteve relacionada ao layout e à usabilidade da aplicação, especialmente à adaptação das telas, formulários e interações para dispositivos móveis.
 
 ## Referências
 
