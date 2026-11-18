@@ -62,6 +62,8 @@ EXPO_PUBLIC_API_URL=https://seu-servidor/api/v1
 
 O arquivo `.env-exemple` contém o modelo dessa configuração. Como variáveis com prefixo `EXPO_PUBLIC_` são incluídas no app cliente, use essa variável somente para a URL pública da API, nunca para senhas ou chaves secretas.
 
+A API está hospedada em um servidor público que pode ficar inativo após mais de cinco minutos sem requisições. Quando isso acontece, a primeira chamada pode demorar um pouco enquanto o servidor volta a responder.
+
 ## Comandos disponíveis
 
 | Comando | Descrição |
