@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -23,7 +24,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const passwordInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInputInstance>(null);
 
   async function handleLogin() {
     if (!email.trim() || !password) {

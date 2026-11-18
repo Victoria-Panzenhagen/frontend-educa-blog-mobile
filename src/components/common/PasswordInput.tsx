@@ -3,15 +3,15 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
-  TextInputProps,
   View,
 } from 'react-native';
+import type { TextInputInstance, TextInputProps } from 'react-native';
 
 import { colors, spacing } from '@/theme';
 
 type PasswordInputProps = Omit<TextInputProps, 'secureTextEntry'>;
 
-export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
+export const PasswordInput = forwardRef<TextInputInstance, PasswordInputProps>(
   function PasswordInput({ style, ...inputProps }, ref) {
     const [visible, setVisible] = useState(false);
 

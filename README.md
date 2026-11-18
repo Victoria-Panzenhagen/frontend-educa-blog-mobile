@@ -17,7 +17,7 @@ Aplicativo mobile do Educa Blog para leitura e gerenciamento de publicações e 
 
 ## Requisitos
 
-- Node.js compatível com Expo SDK 58;
+- Node.js 24;
 - npm (o repositório mantém `package-lock.json`);
 - Android Emulator, dispositivo Android com Expo Go compatível ou development build para executar no Android;
 - Xcode e iOS Simulator para execução local no iOS;
